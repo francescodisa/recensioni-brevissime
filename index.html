@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Recensioni brevissime di libri difficili</title>
+<style>
+@font-face{font-family:'Old Standard TT';font-weight:400;font-style:normal;font-display:swap;src:url(fonts/old-standard-tt-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Old Standard TT';font-weight:400;font-style:italic;font-display:swap;src:url(fonts/old-standard-tt-latin-400-italic.woff2) format('woff2')}
+@font-face{font-family:'Old Standard TT';font-weight:700;font-style:normal;font-display:swap;src:url(fonts/old-standard-tt-latin-700-normal.woff2) format('woff2')}
+</style>
+</head>
+<body>
+
+<style>
+/* Layout: one card on the table at a time, drawn from a shuffled deck; a library-style
+   catalogue as the second view. Cards keep their print colours in both themes. */
+:root{
+  --ground:#e4dcc8;
+  --ink:#151311;
+  --muted:#5e5547;
+  --line:#151311;
+  --field:#ece4d0;
+  --mark:#d9c99c;
+  --paper:#f3eddc;
+  --paper-ink:#151311;
+  --shadow:rgba(40,28,12,.4);
+  --serif:'Old Standard TT','Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#16130f; --ink:#efe7d3; --muted:#a99f8a; --line:#efe7d3; --field:#201c16; --mark:#5a4c2a;
+    --shadow:rgba(0,0,0,.75); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#16130f; --ink:#efe7d3; --muted:#a99f8a; --line:#efe7d3; --field:#201c16; --mark:#5a4c2a;
+  --shadow:rgba(0,0,0,.75); color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.45;padding-inline:20px;padding-block:22px 56px;overflow-x:clip}
+.wrap{max-width:1180px;margin:0 auto}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--line);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.band{width:100%;aspect-ratio:980/30;background:var(--line);-webkit-mask:var(--band) center/100% 100% no-repeat;mask:var(--band) center/100% 100% no-repeat}
+
+/* masthead */
+.mast{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px}
+.mast .band{max-width:980px}
+.mast h1{margin:4px 0 0;font-weight:400;font-size:clamp(30px,4.8vw,60px);line-height:1;letter-spacing:-.015em;text-wrap:balance}
+.mast h1 .by{display:block;font-style:italic;font-size:.4em;letter-spacing:.04em;margin-top:.9em;opacity:.85}
+.mast h1 em{display:block;font-style:normal;font-size:.42em;letter-spacing:.24em;text-transform:uppercase;margin-top:.5em}
+
+/* navigation bar */
+.bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px 24px;margin:20px auto 0;max-width:980px;padding-block:12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.seg{display:inline-flex;border:1px solid var(--line)}
+.seg button{background:transparent;border:0;padding:8px 14px;min-height:42px;font-size:13px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--line);color:var(--ground)}
+.handle{font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;border-bottom:1px solid transparent}
+.handle:hover,.handle:focus-visible{color:var(--ink);border-bottom-color:currentColor}
+.foot{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;margin-top:56px}
+.foot .band{max-width:980px;width:100%}
+.foot p{margin:0;font-size:15px;color:var(--muted)}
+.foot .links{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 28px}
+.foot .links a{color:var(--ink);font-size:14px;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:2px}
+.foot .links a:hover,.foot .links a:focus-visible{background:var(--ink);color:var(--ground)}
+
+/* ---------- home: one card ---------- */
+.home{display:flex;flex-direction:column;align-items:center;gap:22px;margin-top:34px}
+.stage{position:relative;width:min(100%, 620px, max(300px, calc(100svh - 300px)));aspect-ratio:1}
+.stage .msg{position:absolute;inset:0;display:grid;place-items:center;font-style:italic;color:var(--muted);text-align:center;padding:20px}
+.ctrl{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px}
+.btn{background:transparent;border:1px solid var(--line);min-height:44px;padding:8px 18px;font-size:13px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:10px;transition:background .2s,color .2s}
+.btn:hover{background:var(--line);color:var(--ground)}
+.btn:disabled{opacity:.35;cursor:default;background:transparent;color:var(--ink)}
+.btn.primary{background:var(--line);color:var(--ground)}
+.btn.primary:hover{background:transparent;color:var(--ink)}
+.deck{margin:0;font-size:15px;font-style:italic;color:var(--muted);font-variant-numeric:tabular-nums;text-align:center}
+.hint{margin:0;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- card (1080 design units) ---------- */
+.cw{position:absolute;inset:0;container-type:inline-size}
+.card{--u:calc(100cqw / 1080);position:absolute;inset:0;cursor:pointer;perspective:2400px;transform:rotate(var(--r));transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.cw.cur:hover .card{transform:translateY(-6px) rotate(0deg)}
+.inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.65,0,.25,1)}
+.card.en .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--paper);color:var(--paper-ink);
+  font-family:var(--serif);display:flex;flex-direction:column;align-items:center;text-align:center;
+  padding:calc(var(--u)*40) calc(var(--u)*50) calc(var(--u)*38);
+  box-shadow:0 1px 0 rgba(0,0,0,.06),0 calc(var(--u)*34) calc(var(--u)*70) calc(var(--u)*-26) var(--shadow);transition:box-shadow .45s}
+.cw.cur:hover .face{box-shadow:0 1px 0 rgba(0,0,0,.06),0 calc(var(--u)*64) calc(var(--u)*100) calc(var(--u)*-30) var(--shadow)}
+.face.back{transform:rotateY(180deg)}
+.face p,.face h2{margin:0;font-weight:400}
+.face .band{width:calc(var(--u)*980);flex:none;background:var(--paper-ink)}
+.face .band.lo{margin-top:calc(var(--u)*14)}
+.f-rub{font-size:calc(var(--u)*27);letter-spacing:calc(var(--u)*9);text-transform:uppercase;margin-top:calc(var(--u)*30) !important;line-height:1.45}
+.f-orn{display:flex;align-items:center;gap:calc(var(--u)*16);margin-top:calc(var(--u)*18);width:calc(var(--u)*560)}
+.f-orn i{flex:1;height:calc(var(--u)*2);background:var(--paper-ink)}
+.f-orn b{width:calc(var(--u)*13);height:calc(var(--u)*13);background:var(--paper-ink);transform:rotate(45deg)}
+.f-t{font-size:calc(var(--u)*var(--tp));line-height:1;margin-top:calc(var(--u)*var(--tm)) !important;letter-spacing:calc(var(--u)*-2);text-wrap:balance}
+.f-by{font-size:calc(var(--u)*40);margin-top:calc(var(--u)*16) !important}
+.f-by span{letter-spacing:calc(var(--u)*10);text-transform:uppercase;font-size:calc(var(--u)*38);margin-left:calc(var(--u)*8)}
+.f-rv{font-size:calc(var(--u)*var(--tx));line-height:1.38;margin-top:calc(var(--u)*40) !important;width:calc(var(--u)*880)}
+.f-pl-l{font-size:calc(var(--u)*27);letter-spacing:calc(var(--u)*8);text-transform:uppercase;font-weight:700 !important;margin-top:calc(var(--u)*28) !important}
+.f-pl{font-size:calc(var(--u)*var(--tx));line-height:1.34;margin-top:calc(var(--u)*6) !important;width:calc(var(--u)*880);font-style:italic}
+.f-sp{flex:1;min-height:calc(var(--u)*14)}
+.f-vote{display:flex;align-items:center;gap:calc(var(--u)*26)}
+.f-vote .lab{font-size:calc(var(--u)*27);letter-spacing:calc(var(--u)*8);text-transform:uppercase}
+.f-vote .n{font-size:calc(var(--u)*30);letter-spacing:calc(var(--u)*5);font-style:italic}
+.dm{display:flex;gap:calc(var(--u)*18);align-items:center}
+.dm i{width:calc(var(--u)*28);height:calc(var(--u)*28);transform:rotate(45deg);background:var(--paper-ink)}
+.dm i.o{background:transparent;border:calc(var(--u)*3) solid var(--paper-ink)}
+.cw.cur .dm i.f{animation:stamp .5s cubic-bezier(.3,1.6,.5,1) backwards;animation-delay:calc(560ms + var(--k) * 90ms)}
+.f-sig{font-size:calc(var(--u)*19);letter-spacing:calc(var(--u)*6);text-transform:uppercase;margin-top:calc(var(--u)*18) !important}
+
+/* draw / discard */
+.cw.in{animation:lay .75s cubic-bezier(.2,.8,.2,1) backwards}
+.cw.in-back{animation:fromleft .7s cubic-bezier(.2,.8,.2,1) backwards}
+.cw.out-l{animation:toleft .55s cubic-bezier(.5,0,.75,0) forwards;pointer-events:none;z-index:2}
+.cw.out-r{animation:toright .55s cubic-bezier(.5,0,.75,0) forwards;pointer-events:none;z-index:2}
+@keyframes lay{from{transform:translateY(46px) rotate(-5deg);opacity:.35}}
+@keyframes fromleft{from{transform:translateX(-70%) rotate(-11deg);opacity:0}}
+@keyframes toleft{to{transform:translateX(-80%) rotate(-13deg);opacity:0}}
+@keyframes toright{to{transform:translateX(80%) rotate(13deg);opacity:0}}
+@keyframes stamp{from{transform:rotate(45deg) scale(2.2);opacity:0}}
+
+/* ---------- archive ---------- */
+.arch{max-width:980px;margin:30px auto 0}
+.tools{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center}
+.search{flex:1 1 320px;display:flex;align-items:center;gap:12px;min-width:0;border-bottom:1px solid var(--line);padding-bottom:4px}
+.search input{flex:1;min-width:0;font:inherit;font-size:22px;background:transparent;border:0;color:var(--ink);padding:6px 2px}
+.search input::placeholder{color:var(--muted);font-style:italic}
+.search input:focus{outline:none}
+.search:focus-within{border-bottom-width:2px;padding-bottom:3px}
+.count{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums}
+.cat{list-style:none;margin:26px 0 0;padding:0;columns:3 260px;column-gap:44px}
+.cat li{break-inside:avoid}
+.cat .letter{font-size:40px;line-height:1;margin:22px 0 8px;display:flex;align-items:center;gap:12px;break-after:avoid}
+.cat .letter:first-child{margin-top:0}
+.cat .letter::after{content:"";flex:1;height:1px;background:var(--line);opacity:.4}
+.cat .who{font-size:13px;letter-spacing:.18em;text-transform:uppercase;margin:12px 0 2px;color:var(--muted);break-after:avoid}
+.cat button{display:block;width:100%;text-align:left;background:none;border:0;padding:6px 0 6px 16px;cursor:pointer;line-height:1.3;position:relative}
+.cat button::before{content:"";position:absolute;left:0;top:.95em;width:6px;height:6px;margin-top:-3px;background:var(--line);transform:rotate(45deg) scale(.6);opacity:.45;transition:transform .2s,opacity .2s}
+.cat button:hover::before,.cat button:focus-visible::before{transform:rotate(45deg) scale(1);opacity:1}
+.cat button:hover .ti{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.cat .by{display:block;font-size:14px;color:var(--muted)}
+.cat .snip{display:block;font-size:14px;font-style:italic;color:var(--muted);margin-top:2px}
+.cat mark{background:var(--mark);color:inherit;padding:0 1px}
+.cat .vt{font-size:11px;letter-spacing:.1em;margin-left:6px;color:var(--muted);white-space:nowrap}
+.none{font-style:italic;color:var(--muted);font-size:20px;margin-top:30px}
+
+@media (max-width:520px){
+  body{padding-inline:16px;font-size:16px}
+  .seg button{padding:8px 11px}
+  .btn{padding:8px 14px}
+  .handle{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .cw.in,.cw.in-back,.cw.out-l,.cw.out-r,.cw.cur .dm i.f{animation:none}
+  .inner,.card,.face{transition:none}
+}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="band" aria-hidden="true"></div>
+    <h1 id="t-h1">Recensioni brevissime<em>di libri difficili</em><span class="by">di Francesco D’Isa</span></h1>
+  </header>
+
+  <nav class="bar" aria-label="Sezioni">
+    <div class="seg" id="viewseg">
+      <button type="button" data-view="home" aria-pressed="true" id="t-vhome">Una a caso</button>
+      <button type="button" data-view="arch" aria-pressed="false" id="t-varch">Archivio</button>
+    </div>
+    <a class="handle" href="https://www.instagram.com/disa_fran/" target="_blank" rel="noopener">@disa_fran</a>
+    <div class="seg" role="group" aria-label="Lingua" id="langseg">
+      <button type="button" data-lang="it" aria-pressed="true">Italiano</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </nav>
+
+  <section class="home" id="v-home" aria-label="Scheda">
+    <div class="stage" id="stage"><p class="msg" id="msg">Sto mescolando il mazzo…</p></div>
+    <div class="ctrl">
+      <button type="button" class="btn" id="prev"><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M15 6H2M6 1 1 6l5 5"/></svg><span id="t-prev">Indietro</span></button>
+      <button type="button" class="btn primary" id="next"><span id="t-next">Pesca un’altra</span><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M1 6h13M10 1l5 5-5 5"/></svg></button>
+    </div>
+    <p class="deck" id="deck" aria-live="polite"></p>
+  </section>
+
+  <section class="arch" id="v-arch" aria-label="Archivio" hidden>
+    <div class="tools">
+      <label class="search" for="q">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+        <span class="sr" id="t-qlab">Cerca</span>
+        <input id="q" type="search" autocomplete="off" placeholder="Cerca un titolo, un autore, una parola">
+      </label>
+      <div class="seg" role="group" aria-label="Ordina" id="sortseg">
+        <button type="button" data-sort="author" aria-pressed="true" id="t-byA">Per autore</button>
+        <button type="button" data-sort="title" aria-pressed="false" id="t-byT">Per titolo</button>
+      </div>
+      <span class="count" id="count" aria-live="polite"></span>
+    </div>
+    <ol class="cat" id="cat"></ol>
+  </section>
+
+  <footer class="foot">
+    <div class="band" aria-hidden="true"></div>
+    <p id="t-fnote">Nuove recensioni ogni tanto su Instagram.</p>
+    <p class="links">
+      <a href="https://www.instagram.com/disa_fran/" target="_blank" rel="noopener"><span id="t-fig">Instagram</span> @disa_fran</a>
+      <a href="https://francescodisa.netlify.app/" target="_blank" rel="noopener"><span id="t-fsite">Il sito di Francesco D’Isa</span></a>
+    </p>
+  </footer>
+</div>
+
+<script>
+/* Reviews live in reviews.json, published next to this page.
+   Each entry: id, author, authorSort ("Surname, Name"), vote 1-5, it{title,review,plot}, en{title,review,plot}. */
+
+const UI = {
+  it:{ h1:'Recensioni brevissime<em>di libri difficili</em><span class="by">di Francesco D’Isa</span>', vhome:'Una a caso', varch:'Archivio',
+       prev:'Indietro', next:'Pesca un’altra', q:'Cerca un titolo, un autore, una parola', qlab:'Cerca',
+       byA:'Per autore', byT:'Per titolo', rub:'Recensioni brevissime<br>di libri difficili', di:'di', plot:'Trama', vote:'Voto',
+       loading:'Sto mescolando il mazzo…', fail:'Non riesco a leggere l’archivio delle schede. Ricarica la pagina.',
+       deck:(s,t)=>`Hai pescato ${s} ${s===1?'scheda':'schede'} su ${t}. Tocca la scheda per pescarne un’altra.`,
+       reshuffled:'Le hai viste tutte; il mazzo è stato rimescolato.',
+       count:(n,t)=> n===t ? `${t} ${t===1?'scheda':'schede'}` : `${n} di ${t}`,
+       none:q=>`Nessuna scheda corrisponde a «${q}».`, lang:'Lingua', sort:'Ordina', nav:'Sezioni',
+       fnote:'Le nuove recensioni escono su Instagram.', fig:'Instagram', fsite:'Il sito di Francesco D’Isa' },
+  en:{ h1:'Very short reviews<em>of difficult books</em><span class="by">by Francesco D’Isa</span>', vhome:'Draw a card', varch:'Archive',
+       prev:'Back', next:'Draw another', q:'Search a title, an author, a word', qlab:'Search',
+       byA:'By author', byT:'By title', rub:'Very short reviews<br>of difficult books', di:'by', plot:'Plot', vote:'Rating',
+       loading:'Shuffling the deck…', fail:'The card archive could not be loaded. Reload the page.',
+       deck:(s,t)=>`You have drawn ${s} of ${t} ${t===1?'card':'cards'}. Tap the card to draw another.`,
+       reshuffled:'You have seen them all; the deck has been reshuffled.',
+       count:(n,t)=> n===t ? `${t} ${t===1?'card':'cards'}` : `${n} of ${t}`,
+       none:q=>`No card matches “${q}”.`, lang:'Language', sort:'Sort', nav:'Sections',
+       fnote:'New reviews are posted on Instagram.', fig:'Instagram', fsite:'Francesco D’Isa’s website' }
+};
+
+const BAND_SVG = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 980 30' preserveAspectRatio='none'><defs><pattern id='p' width='28' height='30' patternUnits='userSpaceOnUse'><path d='M14 8 L20 15 L14 22 L8 15 Z' fill='#000'/></pattern></defs><rect width='980' height='5'/><rect y='25' width='980' height='5'/><rect x='46' y='5' width='888' height='20' fill='url(#p)'/>${[23,957].map(x=>`<g transform='translate(${x} 15)'>${[0,45,90,135].map(a=>`<ellipse rx='3.5' ry='13' transform='rotate(${a})'/>`).join('')}</g>`).join('')}</svg>`;
+document.documentElement.style.setProperty('--band', `url("data:image/svg+xml,${encodeURIComponent(BAND_SVG)}")`);
+
+const store = {
+  get(k,d){ try{ return localStorage.getItem(k) ?? d }catch(e){ return d } },
+  set(k,v){ try{ localStorage.setItem(k,v) }catch(e){} }
+};
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+
+const S = {
+  lang: store.get('rb-lang','it')==='en' ? 'en' : 'it',
+  sort: store.get('rb-sort','author')==='title' ? 'title' : 'author',
+  view: 'home', q: '',
+  books: [], byId: new Map(),
+  deck: [], seen: new Set(), hist: [], pos: -1, reshuffled: false
+};
+
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’']/g,"'").toLowerCase();
+const ARTICLE = /^(?:(?:il|lo|la|i|gli|le|un|uno|una|the|an|a)\s+|l[’']|un[’'])/i;
+const titleKey = t => norm(t.replace(ARTICLE,''));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ROT = [-0.9,0.7,-0.5,1,-0.7,0.4,-0.3,0.8];
+
+function sizes(t, rv){
+  const n = t.length, L = rv.length;
+  const tp = n<=12 ? 116 : n<=18 ? 96 : n<=24 ? 80 : n<=32 ? 66 : n<=46 ? 54 : 46;
+  const tx = L<=190 ? 37 : L<=215 ? 36 : L<=240 ? 35 : L<=265 ? 34 : L<=290 ? 33 : 32;
+  return { tp, tm: tp===116 ? 30 : 40, tx };
+}
+function face(b, lang, back){
+  const d = b[lang] || b.it, u = UI[lang], s = sizes(d.title, d.review);
+  const dm = Array.from({length:5},(_,k)=> k < b.vote ? `<i class="f" style="--k:${k}"></i>` : `<i class="o"></i>`).join('');
+  return `<div class="face ${back?'back':''}" lang="${lang}" style="--tp:${s.tp};--tm:${s.tm};--tx:${s.tx}">
+    <div class="band" aria-hidden="true"></div>
+    <p class="f-rub">${u.rub}</p>
+    <div class="f-orn" aria-hidden="true"><i></i><b></b><i></i></div>
+    <h2 class="f-t">${esc(d.title)}</h2>
+    <p class="f-by"><em>${u.di}</em> <span>${esc(b.author)}</span></p>
+    <p class="f-rv">${esc(d.review)}</p>
+    <p class="f-pl-l">${u.plot}</p>
+    <p class="f-pl">${esc(d.plot)}</p>
+    <div class="f-sp"></div>
+    <div class="f-vote" role="img" aria-label="${u.vote} ${b.vote}/5"><span class="lab" aria-hidden="true">${u.vote}</span><span class="dm" aria-hidden="true">${dm}</span><span class="n" aria-hidden="true">${b.vote}/5</span></div>
+    <p class="f-sig">@disa_fran</p>
+    <div class="band lo" aria-hidden="true"></div>
+  </div>`;
+}
+function makeCard(b){
+  const el = document.createElement('article');
+  el.className = 'cw';
+  el.dataset.id = b.id;
+  el.innerHTML = `<div class="card ${S.lang==='en'?'en':''}" style="--r:${ROT[S.books.indexOf(b)%ROT.length]}deg"><div class="inner">${face(b,'it',false)}${face(b,'en',true)}</div></div>`;
+  el.querySelector('.card').addEventListener('click', ()=> next());
+  syncFaces(el);
+  return el;
+}
+function syncFaces(el){
+  const [fit, fen] = el.querySelectorAll('.face');
+  fit.setAttribute('aria-hidden', S.lang!=='it');
+  fen.setAttribute('aria-hidden', S.lang!=='en');
+  const b = S.byId.get(el.dataset.id);
+  el.setAttribute('aria-label', `${b[S.lang].title}, ${UI[S.lang].di} ${b.author}`);
+}
+
+/* ---------- deck ---------- */
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function draw(){
+  let rest = S.deck.filter(id => !S.seen.has(id));
+  if(!rest.length){
+    const cur = S.hist[S.pos];
+    S.seen.clear(); S.reshuffled = true;
+    S.deck = shuffle(S.books.map(b=>b.id).filter(id=>id!==cur || S.books.length===1));
+    rest = S.deck;
+  }
+  return rest[0];
+}
+function present(id, dir){
+  const stage = $('stage');
+  $('msg')?.remove();
+  const old = stage.querySelector('.cw.cur');
+  if(old && old.dataset.id===id) return;
+  if(old){
+    old.classList.remove('cur','in','in-back');
+    if(reduce) old.remove();
+    else { old.classList.add(dir<0 ? 'out-r' : 'out-l'); old.addEventListener('animationend', ()=>old.remove(), {once:true}); }
+  }
+  const el = makeCard(S.byId.get(id));
+  el.classList.add('cur', dir<0 ? 'in-back' : 'in');
+  stage.appendChild(el);
+  S.seen.add(id);
+  try{ history.replaceState(null,'','#'+id); }catch(e){}
+  paintDeck();
+}
+function next(){
+  if(S.view!=='home' || !S.books.length) return;
+  let id;
+  if(S.pos < S.hist.length-1){ id = S.hist[++S.pos]; }
+  else { id = draw(); S.hist.push(id); S.pos = S.hist.length-1; }
+  present(id, 1);
+}
+function prev(){
+  if(S.pos<=0) return;
+  present(S.hist[--S.pos], -1);
+}
+function open(id){
+  S.hist = S.hist.slice(0, S.pos+1); S.hist.push(id); S.pos = S.hist.length-1;
+  setView('home');
+  present(id, 1);
+  window.scrollTo({top:0, behavior: reduce?'auto':'smooth'});
+}
+function paintDeck(){
+  const u = UI[S.lang];
+  $('deck').textContent = S.reshuffled && S.seen.size<=1 ? u.reshuffled : u.deck(S.seen.size, S.books.length);
+  if(S.seen.size>1) S.reshuffled = false;
+  $('prev').disabled = S.pos<=0;
+}
+
+/* ---------- archive ---------- */
+function matches(b){
+  if(!S.q) return true;
+  const hay = norm([b.author, b.it.title, b.en.title, b.it.review, b.en.review, b.it.plot, b.en.plot].join(' '));
+  return norm(S.q).split(/\s+/).filter(Boolean).every(w => hay.includes(w));
+}
+function sorted(list){
+  const L = S.lang;
+  return [...list].sort((a,b)=> S.sort==='author'
+    ? norm(a.authorSort).localeCompare(norm(b.authorSort)) || titleKey(a[L].title).localeCompare(titleKey(b[L].title))
+    : titleKey(a[L].title).localeCompare(titleKey(b[L].title)) || norm(a.authorSort).localeCompare(norm(b.authorSort)));
+}
+function snippet(b){
+  if(!S.q) return '';
+  const words = norm(S.q).split(/\s+/).filter(Boolean);
+  const inHead = s => words.every(w => norm(s).includes(w));
+  if(inHead(b.author + ' ' + b[S.lang].title)) return '';
+  for(const field of [b[S.lang].review, b[S.lang].plot, b[S.lang==='it'?'en':'it'].review]){
+    const n = norm(field);
+    const w = words.find(w => n.includes(w)); if(!w) continue;
+    const i = n.indexOf(w), a = Math.max(0, i-40), z = Math.min(field.length, i+w.length+60);
+    let out = esc(field.slice(a, i)) + '<mark>' + esc(field.slice(i, i+w.length)) + '</mark>' + esc(field.slice(i+w.length, z));
+    return (a>0?'…':'') + out + (z<field.length?'…':'');
+  }
+  return '';
+}
+function renderArch(){
+  const u = UI[S.lang], L = S.lang;
+  const vis = sorted(S.books.filter(matches));
+  $('count').textContent = u.count(vis.length, S.books.length);
+  const cat = $('cat');
+  if(!vis.length){ cat.innerHTML = `<li class="none">${esc(u.none(S.q))}</li>`; return; }
+  let html = '', lastL = '', lastA = '';
+  for(const b of vis){
+    const key = S.sort==='author' ? norm(b.authorSort) : titleKey(b[L].title);
+    const letter = (key.match(/[a-z0-9]/)||['#'])[0].toUpperCase();
+    if(letter!==lastL){ html += `<li class="letter" aria-hidden="true">${letter}</li>`; lastL = letter; lastA = ''; }
+    const sn = snippet(b);
+    const vt = `<span class="vt" aria-label="${u.vote} ${b.vote}/5">${'◆'.repeat(b.vote)}${'◇'.repeat(5-b.vote)}</span>`;
+    if(S.sort==='author'){
+      if(b.authorSort!==lastA){ html += `<li class="who">${esc(b.authorSort)}</li>`; lastA = b.authorSort; }
+      html += `<li><button type="button" data-go="${b.id}"><span class="ti">${esc(b[L].title)}</span>${vt}${sn?`<span class="snip">${sn}</span>`:''}</button></li>`;
+    } else {
+      html += `<li><button type="button" data-go="${b.id}"><span class="ti">${esc(b[L].title)}</span>${vt}<span class="by">${esc(b.author)}</span>${sn?`<span class="snip">${sn}</span>`:''}</button></li>`;
+    }
+  }
+  cat.innerHTML = html;
+}
+
+/* ---------- views, language ---------- */
+function setView(v){
+  S.view = v;
+  $('v-home').hidden = v!=='home';
+  $('v-arch').hidden = v!=='arch';
+  document.querySelectorAll('#viewseg button').forEach(x=> x.setAttribute('aria-pressed', x.dataset.view===v));
+  if(v==='arch'){ renderArch(); try{ history.replaceState(null,'','#archivio'); }catch(e){} }
+  else if(S.hist[S.pos]){ try{ history.replaceState(null,'','#'+S.hist[S.pos]); }catch(e){} }
+}
+function setLang(lang){
+  S.lang = lang; store.set('rb-lang', lang);
+  const u = UI[lang];
+  document.documentElement.lang = lang;
+  $('t-h1').innerHTML = u.h1;
+  $('t-vhome').textContent = u.vhome; $('t-varch').textContent = u.varch;
+  $('t-prev').textContent = u.prev; $('t-next').textContent = u.next;
+  $('q').placeholder = u.q; $('t-qlab').textContent = u.qlab;
+  $('t-byA').textContent = u.byA; $('t-byT').textContent = u.byT;
+  $('t-fnote').textContent = u.fnote; $('t-fig').textContent = u.fig; $('t-fsite').textContent = u.fsite;
+  $('langseg').setAttribute('aria-label', u.lang); $('sortseg').setAttribute('aria-label', u.sort);
+  document.querySelector('nav.bar').setAttribute('aria-label', u.nav);
+  const m = $('msg'); if(m && !S.books.length) m.textContent = u.loading;
+  document.querySelectorAll('#langseg button').forEach(x=> x.setAttribute('aria-pressed', x.dataset.lang===lang));
+  document.querySelectorAll('.cw').forEach(el=>{ el.querySelector('.card').classList.toggle('en', lang==='en'); syncFaces(el); });
+  if(S.books.length){ paintDeck(); renderArch(); }
+}
+
+$('viewseg').addEventListener('click', e=>{ const t = e.target.closest('[data-view]'); if(t) setView(t.dataset.view); });
+$('langseg').addEventListener('click', e=>{ const t = e.target.closest('[data-lang]'); if(t && t.dataset.lang!==S.lang) setLang(t.dataset.lang); });
+$('sortseg').addEventListener('click', e=>{
+  const t = e.target.closest('[data-sort]'); if(!t || t.dataset.sort===S.sort) return;
+  S.sort = t.dataset.sort; store.set('rb-sort', S.sort);
+  document.querySelectorAll('#sortseg button').forEach(x=> x.setAttribute('aria-pressed', x.dataset.sort===S.sort));
+  renderArch();
+});
+$('cat').addEventListener('click', e=>{ const t = e.target.closest('[data-go]'); if(t) open(t.dataset.go); });
+$('next').addEventListener('click', next);
+$('prev').addEventListener('click', prev);
+let qt;
+$('q').addEventListener('input', e=>{ clearTimeout(qt); qt = setTimeout(()=>{ S.q = e.target.value.trim(); renderArch(); }, 120); });
+document.addEventListener('keydown', e=>{
+  if(S.view!=='home' || e.target.closest('input,textarea')) return;
+  if(e.key==='ArrowRight'){ next(); } else if(e.key==='ArrowLeft'){ prev(); }
+});
+
+document.querySelectorAll('#sortseg button').forEach(x=> x.setAttribute('aria-pressed', x.dataset.sort===S.sort));
+setLang(S.lang);
+
+fetch('reviews.json', {cache:'no-cache'})
+  .then(r => { if(!r.ok) throw new Error(r.status); return r.json(); })
+  .then(data => {
+    S.books = (data.reviews||[]).filter(b => b && b.id && b.it);
+    S.books.forEach(b => { if(!b.en) b.en = b.it; S.byId.set(b.id, b); });
+    S.deck = shuffle(S.books.map(b=>b.id));
+    setLang(S.lang);
+    const h = decodeURIComponent(location.hash.slice(1));
+    if(h==='archivio'){ next(); setView('arch'); }
+    else if(S.byId.has(h)){ S.hist=[h]; S.pos=0; present(h, 1); }
+    else next();
+  })
+  .catch(() => { const m = $('msg'); if(m) m.textContent = UI[S.lang].fail; });
+</script>
+
+</body>
+</html>
